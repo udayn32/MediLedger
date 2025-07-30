@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agrichain - See Orders</title>
+    <style> 
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            background-size: cover;
+            background-image: url(grain.jpg);
+        }
+
+        header {
+            background-color: #666;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+        .logout-btn {
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+
+        .search-container {
+            margin: 20px 0;
+        }
+
+        .search-input {
+            padding: 10px;
+            width: 250px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: white;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ccc;
+        }
+
+        th {
+            background-color: #666;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+            cursor: pointer;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .order-details {
+            margin: 15px 0;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Agrichain</h1>
+        <button class="logout-btn">Logout</button>
+    </header>
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search orders...">
+    </div>
+    <table id="ordersTable">
+        <thead>
+            <tr>
+                <th>Crop Name</th>
+                <th>Quantity (kg)</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody id="ordersBody">
+            <!-- Sample Orders -->
+            <tr>
+                <td>Wheat</td>
+                <td>100 kg</td>
+                <td><button class="details-btn" data-id="1">View Details</button></td>
+            </tr>
+            <tr>
+                <td>Rice</td>
+                <td>200 kg</td>
+                <td><button class="details-btn" data-id="2">View Details</button></td>
+            </tr>
+            <tr>
+                <td>Corn</td>
+                <td>150 kg</td>
+                <td><button class="details-btn" data-id="3">View Details</button></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="modal" id="orderModal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <h2>Order Details</h2>
+            <div class="order-details" id="orderDetails">
+                <!-- Sample Order details -->
+                <p><strong>Crop Name:</strong> Wheat</p>
+                <p><strong>Quantity:</strong> 100 kg</p>
+                <p><strong>Status:</strong> Pending</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        const ordersBody = document.getElementById('ordersBody');
+        const orderModal = document.getElementById('orderModal');
+        const orderDetails = document.getElementById('orderDetails');
+        const closeModal = document.getElementById('closeModal');
+
+        // Simulated orders data
+        const sampleOrders = [
+            { id: 1, cropName: 'Wheat', quantity: 100, status: 'Pending' },
+            { id: 2, cropName: 'Rice', quantity: 200, status: 'Completed' },
+            { id: 3, cropName: 'Corn', quantity: 150, status: 'Pending' },
+        ];
+
+        // Display sample orders in the table
+        sampleOrders.forEach(order => {
+            const row = `
+                <tr>
+                    <td>${order.cropName}</td>
+                    <td>${order.quantity} kg</td>
+                    <td><button class="details-btn" data-id="${order.id}">View Details</button></td>
+                </tr>
+            `;
+            ordersBody.innerHTML += row;
+        });
+
+        // Attach event listeners to detail buttons
+        attachDetailButtons();
+
+        function attachDetailButtons() {
+            document.querySelectorAll('.details-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const orderId = this.getAttribute('data-id');
+                    const orderDetail = sampleOrders.find(order => order.id == orderId);
+                    showOrderDetails(orderDetail);
+                });
+            });
+        }
+
+        // Display order details in modal
+        function showOrderDetails(orderDetail) {
+            orderDetails.innerHTML = `
+                <p><strong>Crop Name:</strong> ${orderDetail.cropName}</p>
+                <p><strong>Quantity:</strong> ${orderDetail.quantity} kg</p>
+                <p><strong>Status:</strong> ${orderDetail.status}</p>
+            `;
+            orderModal.style.display = 'block';
+        }
+
+        // Search functionality
+        searchInput.addEventListener('input', function() {
+            const filter = this.value.toLowerCase();
+            const rows = ordersBody.getElementsByTagName('tr');
+            for (let i = 0; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                let found = false;
+                for (let j = 0; j < cells.length - 1; j++) {
+                    if (cells[j].innerText.toLowerCase().indexOf(filter) > -1) {
+                        found = true;
+                        break;
+                    }
+                }
+                rows[i].style.display = found ? '' : 'none';
+            }
+        });
+
+        // Close modal
+        closeModal.onclick = function() {
+            orderModal.style.display = 'none';
+        };
+
+        window.onclick = function(event) {
+            if (event.target === orderModal) {
+                orderModal.style.display = 'none';
+            }
+        };
+    </script>
+</body>
+</html>

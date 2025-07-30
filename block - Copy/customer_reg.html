@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Registration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: url('B12.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+        .registration-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+        }
+        .registration-container h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .registration-container input[type="text"],
+        .registration-container input[type="email"],
+        .registration-container input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .registration-container input[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            width: 100%;
+            border-radius: 5px;
+        }
+        .registration-container input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="registration-container">
+    <h1>Customer Registration</h1>
+    <form action="customer_reg.php" method="POST">
+        <label for="name">Customer Name:</label>
+        <input type="text" name="name" id="name" placeholder="Enter Customer Name" required>
+
+        <label for="email">Customer Email ID:</label>
+        <input type="email" name="email" id="email" placeholder="Enter Email" required>
+
+        <label for="location">Customer Location:</label>
+        <input type="text" name="location" id="location" placeholder="Enter Customer Location" required>
+
+        <label for="password">Create Password:</label>
+        <input type="password" name="password" id="password" placeholder="Create Password" required>
+
+        <input type="submit" value="Register">
+    </form>
+</div>
+
+</body>
+</html>

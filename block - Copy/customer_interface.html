@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Interface</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.3.6/dist/web3.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        input {
+            padding: 10px;
+            margin: 10px;
+            width: calc(100% - 40px);
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #17a2b8;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #138496;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background-color: #fff;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+    <script>
+        let web3;
+        let customerContract;
+
+        window.addEventListener('load', async function() {
+            if (window.ethereum) {
+                web3 = new Web3(window.ethereum);
+                await window.ethereum.enable();
+            } else {
+                alert('Please install MetaMask to interact with this page.');
+            }
+
+            // Initialize customer contract
+            customerContract = new web3.eth.Contract(customerABI, customerAddress);
+            loadAvailableProducts();
+        });
+
+        async function purchaseProduct() {
+            const accounts = await web3.eth.getAccounts();
+            const productId = document.getElementById('product_id').value;
+
+            await customerContract.methods.purchaseProduct(productId)
+                .send({ from: accounts[0] })
+                .on('receipt', function() {
+                    alert('Product purchased successfully!');
+                    loadAvailableProducts();
+                })
+                .on('error', function(error) {
+                    console.error(error);
+                    alert('Error purchasing product.');
+                });
+        }
+
+        async function loadAvailableProducts() {
+            const products = await customerContract.methods.getAvailableProducts().call();
+            const productsElement = document.getElementById('products');
+            productsElement.innerHTML = '';
+
+            products.forEach((product) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `Product ID: ${product.id}, Name: ${product.name}, Price: $${product.price}`;
+                productsElement.appendChild(listItem);
+            });
+        }
+        // Add your web3.js and contract interaction logic here
+    </script>
+</head>
+<body>
+    <h1>Customer Interface</h1>
+    <form id="purchaseForm" onsubmit="purchaseProduct(); return false;">
+        <input type="text" id="product_id" placeholder="Product ID" required>
+        <button type="submit">Purchase Product</button>
+    </form>
+    <h2>Available Products</h2>
+    <ul id="products"></ul>
+</body>
+</html>

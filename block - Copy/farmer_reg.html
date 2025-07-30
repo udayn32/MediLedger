@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Registration Interface</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background: linear-gradient(to bottom right, #f0f5f5, #cce6e6);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: url('farmers.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+        .container {
+            max-width: 800px;
+            width: 90%;
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2c9676;
+            font-weight: 700;
+            font-size: 2.5rem;
+        }
+        label {
+            margin-top: 10px;
+            font-weight: 600;
+            color: #555;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: #2c9676;
+            outline: none;
+            box-shadow: 0 0 5px rgba(44, 150, 118, 0.3);
+        }
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            background-color: #2c9676;
+            color: white;
+            margin-top: 15px;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+        }
+        .message {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.2rem;
+            color: #2c9676;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container animate__animated animate__fadeIn">
+    <h2>Farmer Registration</h2>
+    
+    <form id="registrationForm">
+        <label for="farmer_name">Name:</label>
+        <input type="text" id="farmer_name" placeholder="Enter your name" required>
+
+        <label for="location">Location:</label>
+        <input type="text" id="location" placeholder="Enter your location" required>
+
+        <label for="phone">Phone:</label>
+        <input type="text" id="phone" placeholder="Enter your phone number" required>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" placeholder="Enter your email" required>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" placeholder="password" required>
+
+        <button type="submit" class="btn">Register</button>
+    </form>
+
+    <div class="message" id="message"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.0.0-beta.36/dist/web3.min.js"></script>
+<script>
+    const contractABI = [
+    {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "farmerDetails",
+        "outputs": [
+          {
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "location",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "phone",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "passwordHash",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "constant": true
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "_name",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "_location",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "_phone",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "_email",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "_password",
+            "type": "string"
+          }
+        ],
+        "name": "registerFarmer",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+
+        // Include the complete ABI here
+    ];
+    const contractAddress = '0x297fAa5Eca9cFEBE9112588A513e5eCB668ACc17';
+    const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:9545"));
+    const contract = new web3.eth.Contract(contractABI, contractAddress);
+    let accounts;
+
+    web3.eth.getAccounts()
+        .then(acc => accounts = acc)
+        .catch(err => console.error("Error fetching accounts:", err));
+
+    document.getElementById('registrationForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        
+        const name = document.getElementById('farmer_name').value;
+        const location = document.getElementById('location').value;
+        const phone = document.getElementById('phone').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        try {
+            const gas = await contract.methods.registerFarmer(name, location, phone, email, password)
+                .estimateGas({ from: accounts[0] });
+
+            await contract.methods.registerFarmer(name, location, phone, email, password)
+                .send({ from: accounts[0], gas });
+
+            document.getElementById('message').textContent = "Registration successful!";
+        } catch (error) {
+            console.error(error);
+            document.getElementById('message').textContent = "Error during registration.";
+        }
+    });
+</script>
+
+</body>
+</html>

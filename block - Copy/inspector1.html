@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agrichain - Inspector Dashboard</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            background-image: url(inspector_bg.jpg);
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            color: #34495e;
+        }
+        header {
+            background-color: #2980b9;
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        main {
+            padding: 40px 30px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        h2 {
+            color: #2980b9;
+            font-size: 32px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .farmer-container,
+        .crop-container {
+            margin-bottom: 40px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+        .crop-card {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        .crop-card:last-child {
+            border-bottom: none;
+        }
+        .crop-info {
+            margin: 5px 0;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Agrichain - Inspector Dashboard</h1>
+    </header>
+    <main>
+        <h2>Farmer Details</h2>
+        <div class="farmer-container" id="farmerDetails">
+            <!-- Farmer details will be displayed here -->
+        </div>
+        <h2>Farmer's Crops</h2>
+        <div class="crop-container" id="cropContainer">
+            <!-- Crops will be displayed here -->
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
+    <script>
+        const farmerContractAddress = "0x297fAa5Eca9cFEBE9112588A513e5eCB668ACc17"; // Replace with actual farmer contract address
+        const inspectorContractAddress = "0x53ED9517CeD0DF7B075CFa6DFED1C31D68721Ed3"; // Replace with actual inspector contract address
+        const inspectorABI = [
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "_farmerContractAddress",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "nonpayable",
+                "type": "constructor"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "farmerAddress",
+                        "type": "address"
+                    }
+                ],
+                "name": "fetchFarmerDetails",
+                "outputs": [
+                    {
+                        "internalType": "string",
+                        "name": "name",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "location",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "phone",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "email",
+                        "type": "string"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "farmerAddress",
+                        "type": "address"
+                    }
+                ],
+                "name": "fetchCropsForFarmer",
+                "outputs": [
+                    {
+                        "components": [
+                            {
+                                "internalType": "string",
+                                "name": "cropName",
+                                "type": "string"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "quantity",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "price",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "string",
+                                "name": "placeOfOrigin",
+                                "type": "string"
+                            }
+                        ],
+                        "internalType": "struct I1Farmer.Crop[]",
+                        "name": "",
+                        "type": "tuple[]"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+        let web3;
+        let inspectorContract;
+
+        async function init() {
+            web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:9545"));
+            inspectorContract = new web3.eth.Contract(inspectorABI, inspectorContractAddress);
+            
+            const farmerAddress = "0x2360185ea31cfbff5d1520dc73a481c5ff750477"; // Replace with the actual farmer's address you want to fetch
+            loadFarmerDetails(farmerAddress);
+            loadCropsForFarmer(farmerAddress);
+        }
+
+        async function loadFarmerDetails(farmerAddress) {
+            const details = await inspectorContract.methods.fetchFarmerDetails(farmerAddress).call();
+            displayFarmerDetails(details);
+        }
+
+        function displayFarmerDetails(details) {
+            const farmerDetails = document.getElementById("farmerDetails");
+            farmerDetails.innerHTML = `
+                <p><strong>Name:</strong> ${details[0]}</p>
+                <p><strong>Location:</strong> ${details[1]}</p>
+                <p><strong>Phone:</strong> ${details[2]}</p>
+                <p><strong>Email:</strong> ${details[3]}</p>
+            `;
+        }
+
+        async function loadCropsForFarmer(farmerAddress) {
+            const crops = await inspectorContract.methods.fetchCropsForFarmer(farmerAddress).call();
+            displayCrops(crops);
+        }
+
+        function displayCrops(cropList) {
+            const cropContainer = document.getElementById("cropContainer");
+            cropContainer.innerHTML = "";
+            cropList.forEach(crop => {
+                const cropCard = document.createElement("div");
+                cropCard.className = "crop-card";
+                cropCard.innerHTML = `
+                    <p class="crop-info"><strong>Crop Name:</strong> ${crop.cropName}</p>
+                    <p class="crop-info"><strong>Quantity:</strong> ${crop.quantity}</p>
+                    <p class="crop-info"><strong>Price:</strong> ${crop.price}</p>
+                    <p class="crop-info"><strong>Origin:</strong> ${crop.placeOfOrigin}</p>
+                `;
+                cropContainer.appendChild(cropCard);
+            });
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

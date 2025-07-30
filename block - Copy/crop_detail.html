@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agrichain - Crop Detail</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            background-image: url(g.jpg);
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            color: #dc3a1e;
+        }
+        header {
+            background-color: #cd0f0fdf;
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .logout-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+            font-size: 16px;
+        }
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+        main {
+            padding: 40px 30px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        h2 {
+            color: #333;
+            font-size: 36px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .search-container {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .search-input {
+            padding: 12px;
+            width: 80%;
+            max-width: 500px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+            font-size: 18px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+        .search-input:focus {
+            border-color: #27ae60;
+            outline: none;
+        }
+        .crop-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding-top: 20px;
+        }
+        .crop-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-align: center;
+        }
+        .crop-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        .crop-info {
+            margin: 10px 0;
+            font-size: 18px;
+            color: #34495e;
+        }
+        .reject-btn,
+        .select-btn {
+            background-color: #e7e7e7;
+            border: none;
+            padding: 12px 25px;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: background-color 0.3s;
+        }
+        .reject-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .select-btn {
+            background-color: #27ae60;
+            color: white;
+        }
+        .reject-btn:hover {
+            background-color: #c0392b;
+        }
+        .select-btn:hover {
+            background-color: #219653;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 30px;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.5s ease;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .feedback {
+            color: #e74c3c;
+            margin-top: 30px;
+            font-weight: bold;
+            text-align: center;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Agrichain</h1>
+        <button class="logout-btn">Logout</button>
+    </header>
+    <main>
+        <h2>Crop Detail</h2>
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search crops...">
+        </div>
+        <div class="crop-container" id="cropContainer"></div>
+        <div class="feedback" id="feedbackMessage"></div>
+    </main>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <h2 id="modalTitle">Confirmation</h2>
+            <p id="modalMessage">Are you sure you want to select/reject this crop?</p>
+            <button id="confirmBtn" class="select-btn">Confirm</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
+    <script>
+        const farmerContractAddress = "0x297fAa5Eca9cFEBE9112588A513e5eCB668ACc17";
+        const manufacturerContractAddress = "0xa649dA13F64f7121834C733b8FBb7A99d94e126e";
+
+        const farmerABI = [
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "getCrops",
+                "outputs": [
+                    {
+                        "components": [
+                            { "name": "cropName", "type": "string" },
+                            { "name": "quantity", "type": "uint256" },
+                            { "name": "price", "type": "uint256" },
+                            { "name": "placeOfOrigin", "type": "string" }
+                        ],
+                        "name": "",
+                        "type": "tuple[]"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "getFarmerDetails",
+                "outputs": [
+                    {
+                        "components": [
+                            { "name": "name", "type": "string" },
+                            { "name": "location", "type": "string" },
+                            { "name": "phone", "type": "string" },
+                            { "name": "email", "type": "string" }
+                        ],
+                        "name": "",
+                        "type": "tuple"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+        const manufacturerABI = [
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "viewCropDetails",
+                "outputs": [
+                    {
+                        "components": [
+                            { "name": "cropName", "type": "string" },
+                            { "name": "quantity", "type": "uint256" },
+                            { "name": "price", "type": "uint256" },
+                            { "name": "placeOfOrigin", "type": "string" }
+                        ],
+                        "name": "",
+                        "type": "tuple[]"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "viewFarmerDetails",
+                "outputs": [
+                    {
+                        "components": [
+                            { "name": "name", "type": "string" },
+                            { "name": "location", "type": "string" },
+                            { "name": "phone", "type": "string" },
+                            { "name": "email", "type": "string" }
+                        ],
+                        "name": "",
+                        "type": "tuple"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": false,
+                "inputs": [
+                    { "name": "_cropName", "type": "string" }
+                ],
+                "name": "selectCrop",
+                "outputs": [],
+                "payable": false,
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "constant": false,
+                "inputs": [
+                    { "name": "_cropName", "type": "string" }
+                ],
+                "name": "rejectCrop",
+                "outputs": [],
+                "payable": false,
+                "stateMutability": "nonpayable",
+                "type": "function"
+            }
+        ];
+
+        let web3;
+        let farmerContract;
+        let manufacturerContract;
+        let crops = [];
+        let selectedCrop = null;
+
+        async function init() {
+            web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:9545"));
+            farmerContract = new web3.eth.Contract(farmerABI, farmerContractAddress);
+            manufacturerContract = new web3.eth.Contract(manufacturerABI, manufacturerContractAddress);
+            loadCrops();
+        }
+
+        async function loadCrops() {
+            const accounts = await web3.eth.getAccounts();
+            crops = await farmerContract.methods.getCrops().call({ from: accounts[0] });
+            displayCrops(crops);
+        }
+
+        function displayCrops(cropList) {
+            const cropContainer = document.getElementById("cropContainer");
+            cropContainer.innerHTML = ""; 
+            cropList.forEach((crop, index) => {
+                const cropCard = document.createElement("div");
+                cropCard.className = "crop-card";
+                cropCard.innerHTML = `
+                    <h3>${crop.cropName}</h3>
+                    <p class="crop-info">Quantity: ${crop.quantity}</p>
+                    <p class="crop-info">Price: ${crop.price}</p>
+                    <p class="crop-info">Origin: ${crop.placeOfOrigin}</p>
+                    <button class="select-btn" onclick="openModal('select', '${crop.cropName}')">Select</button>
+                    <button class="reject-btn" onclick="openModal('reject', '${crop.cropName}')">Reject</button>
+                `;
+                cropContainer.appendChild(cropCard);
+            });
+        }
+
+        function openModal(action, cropName) {
+            selectedCrop = cropName;
+            document.getElementById("modalTitle").innerText = `${action.charAt(0).toUpperCase() + action.slice(1)} Crop`;
+            document.getElementById("modalMessage").innerText = `Are you sure you want to ${action} the crop: ${cropName}?`;
+            document.getElementById("modal").style.display = "block";
+            document.getElementById("confirmBtn").onclick = () => {
+                if (action === "select") {
+                    selectCrop(cropName);
+                } else {
+                    rejectCrop(cropName);
+                }
+                closeModal();
+            };
+        }
+
+        function closeModal() {
+            document.getElementById("modal").style.display = "none";
+        }
+
+        async function selectCrop(cropName) {
+            const accounts = await web3.eth.getAccounts();
+            await manufacturerContract.methods.selectCrop(cropName).send({ from: accounts[0] });
+            document.getElementById("feedbackMessage").innerText = `Crop ${cropName} has been selected successfully.`;
+        }
+
+        async function rejectCrop(cropName) {
+            const accounts = await web3.eth.getAccounts();
+            await manufacturerContract.methods.rejectCrop(cropName).send({ from: accounts[0] });
+            document.getElementById("feedbackMessage").innerText = `Crop ${cropName} has been rejected successfully.`;
+        }
+
+        window.onclick = function(event) {
+            if (event.target == document.getElementById("modal")) {
+                closeModal();
+            }
+        };
+
+        document.getElementById("closeModal").onclick = closeModal;
+
+        window.onload = init;
+    </script>
+</body>
+</html>

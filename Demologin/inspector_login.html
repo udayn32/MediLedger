@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <link rel="stylesheet" type="text/css" href="style3.css">
+</head>
+<body>
+ <div class="container">
+   <div class="login-box inspector">
+     <h1>Inspector Login</h1>
+     <form action=id="inspector-login-form">
+       <div class="textbox">
+         <i class="fas fa-user-shield"></i>
+         <div class="textbox">
+          <i class="fas fa-leaf"></i>
+          
+          <input type="text" placeholder="Inspector Name" id="Inspector-name" required>
+        </div>
+
+         <input type="text" placeholder="Inspector ID" id="inspector-id" required>
+       </div>
+       <div class="textbox">
+         <i class="fas fa-lock"></i>
+         <input type="password" placeholder="Password" id="inspector-password" required>
+       </div>
+       <input class="btn" type="submit" value="Login">
+     </form>
+     <p>New User? <a href="inspector_reg.html" id="forgot-password-link">Register here</a></p> <!-- Update link -->
+   </div>
+ </div>
+
+ <div id="forgot-password-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" id="close-modal">&times;</span>
+      <h2>Reset Password</h2>
+      <form id="forgot-password-form">
+        <input type="email" placeholder="Enter your email" id="email" required>
+        <input class="btn" type="submit" value="Send Reset Link">
+      </form>
+    </div>
+  </div>
+
+ <script>
+   document.getElementById('inspector-login-form').addEventListener('submit', function(event) {
+       event.preventDefault(); // Prevent default form submission
+       
+       var username = document.getElementById('inspector-id').value;
+       var password = document.getElementById('inspector-password').value;
+       
+       if (username && password) {
+         window.location.href = 'index.html'; // Redirect to index.html
+       } else {
+         alert('Please enter both username and password.');
+       }
+   });
+
+   document.getElementById('forgot-password-link').addEventListener('click', function(event) {
+       event.preventDefault();
+       window.location.href = 'inspector_reg.html'; // Redirect to inspector_reg.html
+   });
+
+   document.getElementById('close-modal').addEventListener('click', function() {
+       document.getElementById('forgot-password-modal').style.display = 'none';
+   });
+
+   window.addEventListener('click', function(event) {
+       if (event.target === document.getElementById('forgot-password-modal')) {
+           document.getElementById('forgot-password-modal').style.display = 'none';
+       }
+   });
+ </script>
+</body>
+</html>

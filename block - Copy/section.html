@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Details</title>
+    <style> 
+        /* Same styling as Page 1, you can reuse the CSS */
+        /* ... */
+
+        .crop-container {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .crop-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .crop-actions {
+            display: flex;
+        }
+
+        .crop-actions button {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Agrichain</h1>
+        <a href="#" id="logout">Logout</a> 
+    </header>
+
+    <div class="container">
+        <h2>Crop Detail</h2>
+
+        <div class="crop-container">
+            <div class="crop-details">
+                <h3>crop 1</h3> 
+                <div class="crop-actions">
+                    <button style="background-color: #f44336;">Reject</button>
+                    <button style="background-color: #4CAF50;">Select</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Repeat the crop-container as needed -->
+
+        <div class="crop-container">
+            <div class="crop-details">
+                <h3>crop 16</h3> 
+                <div class="crop-actions">
+                    <button style="background-color: #f44336;">Reject</button>
+                    <button style="background-color: #4CAF50;">Select</button>
+                </div>
+            </div>
+        </div> 
+
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Agrichain. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

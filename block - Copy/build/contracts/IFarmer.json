@@ -1,0 +1,2380 @@
+{
+  "contractName": "IFarmer",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "getCrops",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "cropName",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "quantity",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "price",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "placeOfOrigin",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct IFarmer.Crop[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getFarmerDetails",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "location",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "phone",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "email",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct IFarmer.Farmer",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.0+commit.c7dfd78e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"getCrops\",\"outputs\":[{\"components\":[{\"internalType\":\"string\",\"name\":\"cropName\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"quantity\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"placeOfOrigin\",\"type\":\"string\"}],\"internalType\":\"struct IFarmer.Crop[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getFarmerDetails\",\"outputs\":[{\"components\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"location\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"phone\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"email\",\"type\":\"string\"}],\"internalType\":\"struct IFarmer.Farmer\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/Manufacturer.sol\":\"IFarmer\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/Manufacturer.sol\":{\"keccak256\":\"0xd69715c9dbdf686a2d9b1530e6faaace9c3fa4c21d1c02e4edcd524dfa982a61\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://3e2259118845d373bf68fd43b1fb2a83177bfdcb970903923ba6f4f84ee20063\",\"dweb:/ipfs/QmZTYfTZp6W7KdnD5Q9eewRb39RW4Chh4RphK4bQDAZEKu\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.0;\r\n\r\n// Interface for Farmer contract\r\ninterface IFarmer {\r\n    struct Crop {\r\n        string cropName;\r\n        uint256 quantity;\r\n        uint256 price;\r\n        string placeOfOrigin;\r\n    }\r\n\r\n    struct Farmer {\r\n        string name;\r\n        string location;\r\n        string phone;\r\n        string email;\r\n    }\r\n\r\n    function getCrops() external view returns (Crop[] memory);\r\n    function getFarmerDetails() external view returns (Farmer memory);\r\n}\r\n\r\ncontract Manufacturer {\r\n    address public owner;\r\n    IFarmer private farmerContract;\r\n\r\n    // Event to log crop selection or rejection\r\n    event CropAction(address indexed manufacturer, string cropName, bool isSelected);\r\n\r\n    // Mapping to store the status of crops (selected or rejected) based on crop name\r\n    mapping(bytes32 => bool) private cropStatus; // Use a hashed crop name for mapping\r\n\r\n    // Constructor to set the farmer contract address\r\n    constructor(address _farmerContractAddress) {\r\n        owner = msg.sender; // Set the contract creator as the owner\r\n        farmerContract = IFarmer(_farmerContractAddress); // Initialize the farmer contract\r\n    }\r\n\r\n    // Modifier to restrict access to the contract owner\r\n    modifier onlyOwner() {\r\n        require(msg.sender == owner, \"Only the contract owner can perform this action.\");\r\n        _;\r\n    }\r\n\r\n    // Function to view crop details from the Farmer contract\r\n    function viewCropDetails() public view returns (IFarmer.Crop[] memory) {\r\n        return farmerContract.getCrops(); // Retrieve crops from the farmer contract\r\n    }\r\n\r\n    // Function to view farmer registration details\r\n    function viewFarmerDetails() public view returns (IFarmer.Farmer memory) {\r\n        return farmerContract.getFarmerDetails(); // Retrieve farmer details from the farmer contract\r\n    }\r\n\r\n    // Internal function to hash crop names\r\n    function _getCropHash(string memory _cropName) internal pure returns (bytes32) {\r\n        return keccak256(abi.encodePacked(_cropName));\r\n    }\r\n\r\n    // Function to select a crop\r\n    function selectCrop(string memory _cropName) public onlyOwner {\r\n        bytes32 cropHash = _getCropHash(_cropName);\r\n        cropStatus[cropHash] = true; // Set crop status to selected\r\n        emit CropAction(msg.sender, _cropName, true); // Emit event for crop selection\r\n    }\r\n\r\n    // Function to reject a crop\r\n    function rejectCrop(string memory _cropName) public onlyOwner {\r\n        bytes32 cropHash = _getCropHash(_cropName);\r\n        cropStatus[cropHash] = false; // Set crop status to rejected\r\n        emit CropAction(msg.sender, _cropName, false); // Emit event for crop rejection\r\n    }\r\n\r\n    // Function to get the selection status of a crop\r\n    function getCropStatus(string memory _cropName) public view returns (bool) {\r\n        bytes32 cropHash = _getCropHash(_cropName);\r\n        return cropStatus[cropHash]; // Return the selection status of the crop\r\n    }\r\n}\r\n",
+  "sourcePath": "C:\\xampp\\htdocs\\block\\contracts\\Manufacturer.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/Manufacturer.sol",
+    "exportedSymbols": {
+      "IFarmer": [
+        205
+      ],
+      "Manufacturer": [
+        362
+      ]
+    },
+    "id": 363,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 173,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "33:23:1"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 205,
+        "linearizedBaseContracts": [
+          205
+        ],
+        "name": "IFarmer",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "canonicalName": "IFarmer.Crop",
+            "id": 182,
+            "members": [
+              {
+                "constant": false,
+                "id": 175,
+                "mutability": "mutable",
+                "name": "cropName",
+                "nodeType": "VariableDeclaration",
+                "scope": 182,
+                "src": "142:15:1",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 174,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "142:6:1",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 177,
+                "mutability": "mutable",
+                "name": "quantity",
+                "nodeType": "VariableDeclaration",
+                "scope": 182,
+                "src": "168:16:1",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 176,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "168:7:1",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 179,
+                "mutability": "mutable",
+                "name": "price",
+                "nodeType": "VariableDeclaration",
+                "scope": 182,
+                "src": "195:13:1",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 178,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "195:7:1",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 181,
+                "mutability": "mutable",
+                "name": "placeOfOrigin",
+                "nodeType": "VariableDeclaration",
+                "scope": 182,
+                "src": "219:20:1",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 180,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "219:6:1",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "visibility": "internal"
+              }
+            ],
+            "name": "Crop",
+            "nodeType": "StructDefinition",
+            "scope": 205,
+            "src": "119:128:1",
+            "visibility": "public"
+          },
+          {
+            "canonicalName": "IFarmer.Farmer",
+            "id": 191,
+            "members": [
+              {
+                "constant": false,
+                "id": 184,
+                "mutability": "mutable",
+                "name": "name",
+                "nodeType": "VariableDeclaration",
+                "scope": 191,
+                "src": "280:11:1",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 183,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "280:6:1",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 186,
+                "mutability": "mutable",
+                "name": "location",
+                "nodeType": "VariableDeclaration",
+                "scope": 191,
+                "src": "302:15:1",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 185,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "302:6:1",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 188,
+                "mutability": "mutable",
+                "name": "phone",
+                "nodeType": "VariableDeclaration",
+                "scope": 191,
+                "src": "328:12:1",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 187,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "328:6:1",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 190,
+                "mutability": "mutable",
+                "name": "email",
+                "nodeType": "VariableDeclaration",
+                "scope": 191,
+                "src": "351:12:1",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 189,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "351:6:1",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "visibility": "internal"
+              }
+            ],
+            "name": "Farmer",
+            "nodeType": "StructDefinition",
+            "scope": 205,
+            "src": "255:116:1",
+            "visibility": "public"
+          },
+          {
+            "functionSelector": "5f073f3a",
+            "id": 198,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getCrops",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 192,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "396:2:1"
+            },
+            "returnParameters": {
+              "id": 197,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 196,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 198,
+                  "src": "422:13:1",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_struct$_Crop_$182_memory_ptr_$dyn_memory_ptr",
+                    "typeString": "struct IFarmer.Crop[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 194,
+                      "nodeType": "UserDefinedTypeName",
+                      "pathNode": {
+                        "id": 193,
+                        "name": "Crop",
+                        "nodeType": "IdentifierPath",
+                        "referencedDeclaration": 182,
+                        "src": "422:4:1"
+                      },
+                      "referencedDeclaration": 182,
+                      "src": "422:4:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_Crop_$182_storage_ptr",
+                        "typeString": "struct IFarmer.Crop"
+                      }
+                    },
+                    "id": 195,
+                    "nodeType": "ArrayTypeName",
+                    "src": "422:6:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_struct$_Crop_$182_storage_$dyn_storage_ptr",
+                      "typeString": "struct IFarmer.Crop[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "421:15:1"
+            },
+            "scope": 205,
+            "src": "379:58:1",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "functionSelector": "3b1bdb21",
+            "id": 204,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getFarmerDetails",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 199,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "468:2:1"
+            },
+            "returnParameters": {
+              "id": 203,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 202,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 204,
+                  "src": "494:13:1",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Farmer_$191_memory_ptr",
+                    "typeString": "struct IFarmer.Farmer"
+                  },
+                  "typeName": {
+                    "id": 201,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 200,
+                      "name": "Farmer",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 191,
+                      "src": "494:6:1"
+                    },
+                    "referencedDeclaration": 191,
+                    "src": "494:6:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Farmer_$191_storage_ptr",
+                      "typeString": "struct IFarmer.Farmer"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "493:15:1"
+            },
+            "scope": 205,
+            "src": "443:66:1",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 363,
+        "src": "94:418:1"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "id": 362,
+        "linearizedBaseContracts": [
+          362
+        ],
+        "name": "Manufacturer",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "functionSelector": "8da5cb5b",
+            "id": 207,
+            "mutability": "mutable",
+            "name": "owner",
+            "nodeType": "VariableDeclaration",
+            "scope": 362,
+            "src": "545:20:1",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_address",
+              "typeString": "address"
+            },
+            "typeName": {
+              "id": 206,
+              "name": "address",
+              "nodeType": "ElementaryTypeName",
+              "src": "545:7:1",
+              "stateMutability": "nonpayable",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address",
+                "typeString": "address"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "id": 210,
+            "mutability": "mutable",
+            "name": "farmerContract",
+            "nodeType": "VariableDeclaration",
+            "scope": 362,
+            "src": "572:30:1",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_contract$_IFarmer_$205",
+              "typeString": "contract IFarmer"
+            },
+            "typeName": {
+              "id": 209,
+              "nodeType": "UserDefinedTypeName",
+              "pathNode": {
+                "id": 208,
+                "name": "IFarmer",
+                "nodeType": "IdentifierPath",
+                "referencedDeclaration": 205,
+                "src": "572:7:1"
+              },
+              "referencedDeclaration": 205,
+              "src": "572:7:1",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_IFarmer_$205",
+                "typeString": "contract IFarmer"
+              }
+            },
+            "visibility": "private"
+          },
+          {
+            "anonymous": false,
+            "id": 218,
+            "name": "CropAction",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 217,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 212,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "manufacturer",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 218,
+                  "src": "677:28:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 211,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "677:7:1",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 214,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "cropName",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 218,
+                  "src": "707:15:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 213,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "707:6:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 216,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "isSelected",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 218,
+                  "src": "724:15:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 215,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "724:4:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "676:64:1"
+            },
+            "src": "660:81:1"
+          },
+          {
+            "constant": false,
+            "id": 222,
+            "mutability": "mutable",
+            "name": "cropStatus",
+            "nodeType": "VariableDeclaration",
+            "scope": 362,
+            "src": "836:43:1",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_bytes32_$_t_bool_$",
+              "typeString": "mapping(bytes32 => bool)"
+            },
+            "typeName": {
+              "id": 221,
+              "keyType": {
+                "id": 219,
+                "name": "bytes32",
+                "nodeType": "ElementaryTypeName",
+                "src": "844:7:1",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes32",
+                  "typeString": "bytes32"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "836:24:1",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_bytes32_$_t_bool_$",
+                "typeString": "mapping(bytes32 => bool)"
+              },
+              "valueType": {
+                "id": 220,
+                "name": "bool",
+                "nodeType": "ElementaryTypeName",
+                "src": "855:4:1",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bool",
+                  "typeString": "bool"
+                }
+              }
+            },
+            "visibility": "private"
+          },
+          {
+            "body": {
+              "id": 238,
+              "nodeType": "Block",
+              "src": "1025:171:1",
+              "statements": [
+                {
+                  "expression": {
+                    "id": 230,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 227,
+                      "name": "owner",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 207,
+                      "src": "1036:5:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "expression": {
+                        "id": 228,
+                        "name": "msg",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 4294967281,
+                        "src": "1044:3:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_magic_message",
+                          "typeString": "msg"
+                        }
+                      },
+                      "id": 229,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "sender",
+                      "nodeType": "MemberAccess",
+                      "src": "1044:10:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "src": "1036:18:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "id": 231,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1036:18:1"
+                },
+                {
+                  "expression": {
+                    "id": 236,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 232,
+                      "name": "farmerContract",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 210,
+                      "src": "1106:14:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_IFarmer_$205",
+                        "typeString": "contract IFarmer"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "arguments": [
+                        {
+                          "id": 234,
+                          "name": "_farmerContractAddress",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 224,
+                          "src": "1131:22:1",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        ],
+                        "id": 233,
+                        "name": "IFarmer",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 205,
+                        "src": "1123:7:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_contract$_IFarmer_$205_$",
+                          "typeString": "type(contract IFarmer)"
+                        }
+                      },
+                      "id": 235,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "typeConversion",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "1123:31:1",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_IFarmer_$205",
+                        "typeString": "contract IFarmer"
+                      }
+                    },
+                    "src": "1106:48:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IFarmer_$205",
+                      "typeString": "contract IFarmer"
+                    }
+                  },
+                  "id": 237,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1106:48:1"
+                }
+              ]
+            },
+            "id": 239,
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [],
+            "name": "",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 225,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 224,
+                  "mutability": "mutable",
+                  "name": "_farmerContractAddress",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 239,
+                  "src": "993:30:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 223,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "993:7:1",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "992:32:1"
+            },
+            "returnParameters": {
+              "id": 226,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1025:0:1"
+            },
+            "scope": 362,
+            "src": "981:215:1",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 250,
+              "nodeType": "Block",
+              "src": "1283:111:1",
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "commonType": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "id": 245,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "expression": {
+                            "id": 242,
+                            "name": "msg",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 4294967281,
+                            "src": "1302:3:1",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_magic_message",
+                              "typeString": "msg"
+                            }
+                          },
+                          "id": 243,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "sender",
+                          "nodeType": "MemberAccess",
+                          "src": "1302:10:1",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "==",
+                        "rightExpression": {
+                          "id": 244,
+                          "name": "owner",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 207,
+                          "src": "1316:5:1",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "src": "1302:19:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "hexValue": "4f6e6c792074686520636f6e7472616374206f776e65722063616e20706572666f726d207468697320616374696f6e2e",
+                        "id": 246,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "1323:50:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_37a1d48c8d794a51537bb1948f4c7674861aebd6ada3d5303da30ab6453a1320",
+                          "typeString": "literal_string \"Only the contract owner can perform this action.\""
+                        },
+                        "value": "Only the contract owner can perform this action."
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_37a1d48c8d794a51537bb1948f4c7674861aebd6ada3d5303da30ab6453a1320",
+                          "typeString": "literal_string \"Only the contract owner can perform this action.\""
+                        }
+                      ],
+                      "id": 241,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        4294967278,
+                        4294967278
+                      ],
+                      "referencedDeclaration": 4294967278,
+                      "src": "1294:7:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 247,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1294:80:1",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 248,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1294:80:1"
+                },
+                {
+                  "id": 249,
+                  "nodeType": "PlaceholderStatement",
+                  "src": "1385:1:1"
+                }
+              ]
+            },
+            "id": 251,
+            "name": "onlyOwner",
+            "nodeType": "ModifierDefinition",
+            "parameters": {
+              "id": 240,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1280:2:1"
+            },
+            "src": "1262:132:1",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 262,
+              "nodeType": "Block",
+              "src": "1536:94:1",
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [],
+                    "expression": {
+                      "argumentTypes": [],
+                      "expression": {
+                        "id": 258,
+                        "name": "farmerContract",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 210,
+                        "src": "1554:14:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_IFarmer_$205",
+                          "typeString": "contract IFarmer"
+                        }
+                      },
+                      "id": 259,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "getCrops",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 198,
+                      "src": "1554:23:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_external_view$__$returns$_t_array$_t_struct$_Crop_$182_memory_ptr_$dyn_memory_ptr_$",
+                        "typeString": "function () view external returns (struct IFarmer.Crop memory[] memory)"
+                      }
+                    },
+                    "id": 260,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1554:25:1",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_struct$_Crop_$182_memory_ptr_$dyn_memory_ptr",
+                      "typeString": "struct IFarmer.Crop memory[] memory"
+                    }
+                  },
+                  "functionReturnParameters": 257,
+                  "id": 261,
+                  "nodeType": "Return",
+                  "src": "1547:32:1"
+                }
+              ]
+            },
+            "functionSelector": "f702ddce",
+            "id": 263,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "viewCropDetails",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 252,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1489:2:1"
+            },
+            "returnParameters": {
+              "id": 257,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 256,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 263,
+                  "src": "1513:21:1",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_struct$_Crop_$182_memory_ptr_$dyn_memory_ptr",
+                    "typeString": "struct IFarmer.Crop[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 254,
+                      "nodeType": "UserDefinedTypeName",
+                      "pathNode": {
+                        "id": 253,
+                        "name": "IFarmer.Crop",
+                        "nodeType": "IdentifierPath",
+                        "referencedDeclaration": 182,
+                        "src": "1513:12:1"
+                      },
+                      "referencedDeclaration": 182,
+                      "src": "1513:12:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_Crop_$182_storage_ptr",
+                        "typeString": "struct IFarmer.Crop"
+                      }
+                    },
+                    "id": 255,
+                    "nodeType": "ArrayTypeName",
+                    "src": "1513:14:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_struct$_Crop_$182_storage_$dyn_storage_ptr",
+                      "typeString": "struct IFarmer.Crop[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1512:23:1"
+            },
+            "scope": 362,
+            "src": "1465:165:1",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 273,
+              "nodeType": "Block",
+              "src": "1764:111:1",
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [],
+                    "expression": {
+                      "argumentTypes": [],
+                      "expression": {
+                        "id": 269,
+                        "name": "farmerContract",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 210,
+                        "src": "1782:14:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_IFarmer_$205",
+                          "typeString": "contract IFarmer"
+                        }
+                      },
+                      "id": 270,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "getFarmerDetails",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 204,
+                      "src": "1782:31:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_external_view$__$returns$_t_struct$_Farmer_$191_memory_ptr_$",
+                        "typeString": "function () view external returns (struct IFarmer.Farmer memory)"
+                      }
+                    },
+                    "id": 271,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1782:33:1",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Farmer_$191_memory_ptr",
+                      "typeString": "struct IFarmer.Farmer memory"
+                    }
+                  },
+                  "functionReturnParameters": 268,
+                  "id": 272,
+                  "nodeType": "Return",
+                  "src": "1775:40:1"
+                }
+              ]
+            },
+            "functionSelector": "4a66ac94",
+            "id": 274,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "viewFarmerDetails",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 264,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1717:2:1"
+            },
+            "returnParameters": {
+              "id": 268,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 267,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 274,
+                  "src": "1741:21:1",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Farmer_$191_memory_ptr",
+                    "typeString": "struct IFarmer.Farmer"
+                  },
+                  "typeName": {
+                    "id": 266,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 265,
+                      "name": "IFarmer.Farmer",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 191,
+                      "src": "1741:14:1"
+                    },
+                    "referencedDeclaration": 191,
+                    "src": "1741:14:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Farmer_$191_storage_ptr",
+                      "typeString": "struct IFarmer.Farmer"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1740:23:1"
+            },
+            "scope": 362,
+            "src": "1691:184:1",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 288,
+              "nodeType": "Block",
+              "src": "2007:64:1",
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "id": 284,
+                            "name": "_cropName",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 276,
+                            "src": "2052:9:1",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_string_memory_ptr",
+                              "typeString": "string memory"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_string_memory_ptr",
+                              "typeString": "string memory"
+                            }
+                          ],
+                          "expression": {
+                            "id": 282,
+                            "name": "abi",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 4294967295,
+                            "src": "2035:3:1",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_magic_abi",
+                              "typeString": "abi"
+                            }
+                          },
+                          "id": 283,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "memberName": "encodePacked",
+                          "nodeType": "MemberAccess",
+                          "src": "2035:16:1",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_abiencodepacked_pure$__$returns$_t_bytes_memory_ptr_$",
+                            "typeString": "function () pure returns (bytes memory)"
+                          }
+                        },
+                        "id": 285,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "2035:27:1",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes memory"
+                        }
+                      ],
+                      "id": 281,
+                      "name": "keccak256",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 4294967288,
+                      "src": "2025:9:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
+                        "typeString": "function (bytes memory) pure returns (bytes32)"
+                      }
+                    },
+                    "id": 286,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2025:38:1",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "functionReturnParameters": 280,
+                  "id": 287,
+                  "nodeType": "Return",
+                  "src": "2018:45:1"
+                }
+              ]
+            },
+            "id": 289,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_getCropHash",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 277,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 276,
+                  "mutability": "mutable",
+                  "name": "_cropName",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 289,
+                  "src": "1950:23:1",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 275,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1950:6:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1949:25:1"
+            },
+            "returnParameters": {
+              "id": 280,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 279,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 289,
+                  "src": "1998:7:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 278,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1998:7:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1997:9:1"
+            },
+            "scope": 362,
+            "src": "1928:143:1",
+            "stateMutability": "pure",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 315,
+              "nodeType": "Block",
+              "src": "2175:218:1",
+              "statements": [
+                {
+                  "assignments": [
+                    297
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 297,
+                      "mutability": "mutable",
+                      "name": "cropHash",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 315,
+                      "src": "2186:16:1",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      },
+                      "typeName": {
+                        "id": 296,
+                        "name": "bytes32",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "2186:7:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 301,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "id": 299,
+                        "name": "_cropName",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 291,
+                        "src": "2218:9:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        }
+                      ],
+                      "id": 298,
+                      "name": "_getCropHash",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 289,
+                      "src": "2205:12:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_string_memory_ptr_$returns$_t_bytes32_$",
+                        "typeString": "function (string memory) pure returns (bytes32)"
+                      }
+                    },
+                    "id": 300,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2205:23:1",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "2186:42:1"
+                },
+                {
+                  "expression": {
+                    "id": 306,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "baseExpression": {
+                        "id": 302,
+                        "name": "cropStatus",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 222,
+                        "src": "2239:10:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_mapping$_t_bytes32_$_t_bool_$",
+                          "typeString": "mapping(bytes32 => bool)"
+                        }
+                      },
+                      "id": 304,
+                      "indexExpression": {
+                        "id": 303,
+                        "name": "cropHash",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 297,
+                        "src": "2250:8:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": true,
+                      "nodeType": "IndexAccess",
+                      "src": "2239:20:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bool",
+                        "typeString": "bool"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "hexValue": "74727565",
+                      "id": 305,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "bool",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "2262:4:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bool",
+                        "typeString": "bool"
+                      },
+                      "value": "true"
+                    },
+                    "src": "2239:27:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "id": 307,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2239:27:1"
+                },
+                {
+                  "eventCall": {
+                    "arguments": [
+                      {
+                        "expression": {
+                          "id": 309,
+                          "name": "msg",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 4294967281,
+                          "src": "2324:3:1",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_magic_message",
+                            "typeString": "msg"
+                          }
+                        },
+                        "id": 310,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberName": "sender",
+                        "nodeType": "MemberAccess",
+                        "src": "2324:10:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "id": 311,
+                        "name": "_cropName",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 291,
+                        "src": "2336:9:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        }
+                      },
+                      {
+                        "hexValue": "74727565",
+                        "id": 312,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "bool",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "2347:4:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        "value": "true"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        },
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      ],
+                      "id": 308,
+                      "name": "CropAction",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 218,
+                      "src": "2313:10:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_event_nonpayable$_t_address_$_t_string_memory_ptr_$_t_bool_$returns$__$",
+                        "typeString": "function (address,string memory,bool)"
+                      }
+                    },
+                    "id": 313,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2313:39:1",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 314,
+                  "nodeType": "EmitStatement",
+                  "src": "2308:44:1"
+                }
+              ]
+            },
+            "functionSelector": "1a6069ed",
+            "id": 316,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [
+              {
+                "id": 294,
+                "modifierName": {
+                  "id": 293,
+                  "name": "onlyOwner",
+                  "nodeType": "IdentifierPath",
+                  "referencedDeclaration": 251,
+                  "src": "2165:9:1"
+                },
+                "nodeType": "ModifierInvocation",
+                "src": "2165:9:1"
+              }
+            ],
+            "name": "selectCrop",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 292,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 291,
+                  "mutability": "mutable",
+                  "name": "_cropName",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 316,
+                  "src": "2133:23:1",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 290,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2133:6:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2132:25:1"
+            },
+            "returnParameters": {
+              "id": 295,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2175:0:1"
+            },
+            "scope": 362,
+            "src": "2113:280:1",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 342,
+              "nodeType": "Block",
+              "src": "2497:220:1",
+              "statements": [
+                {
+                  "assignments": [
+                    324
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 324,
+                      "mutability": "mutable",
+                      "name": "cropHash",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 342,
+                      "src": "2508:16:1",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      },
+                      "typeName": {
+                        "id": 323,
+                        "name": "bytes32",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "2508:7:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 328,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "id": 326,
+                        "name": "_cropName",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 318,
+                        "src": "2540:9:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        }
+                      ],
+                      "id": 325,
+                      "name": "_getCropHash",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 289,
+                      "src": "2527:12:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_string_memory_ptr_$returns$_t_bytes32_$",
+                        "typeString": "function (string memory) pure returns (bytes32)"
+                      }
+                    },
+                    "id": 327,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2527:23:1",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "2508:42:1"
+                },
+                {
+                  "expression": {
+                    "id": 333,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "baseExpression": {
+                        "id": 329,
+                        "name": "cropStatus",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 222,
+                        "src": "2561:10:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_mapping$_t_bytes32_$_t_bool_$",
+                          "typeString": "mapping(bytes32 => bool)"
+                        }
+                      },
+                      "id": 331,
+                      "indexExpression": {
+                        "id": 330,
+                        "name": "cropHash",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 324,
+                        "src": "2572:8:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": true,
+                      "nodeType": "IndexAccess",
+                      "src": "2561:20:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bool",
+                        "typeString": "bool"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "hexValue": "66616c7365",
+                      "id": 332,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "bool",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "2584:5:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bool",
+                        "typeString": "bool"
+                      },
+                      "value": "false"
+                    },
+                    "src": "2561:28:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "id": 334,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2561:28:1"
+                },
+                {
+                  "eventCall": {
+                    "arguments": [
+                      {
+                        "expression": {
+                          "id": 336,
+                          "name": "msg",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 4294967281,
+                          "src": "2647:3:1",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_magic_message",
+                            "typeString": "msg"
+                          }
+                        },
+                        "id": 337,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberName": "sender",
+                        "nodeType": "MemberAccess",
+                        "src": "2647:10:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "id": 338,
+                        "name": "_cropName",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 318,
+                        "src": "2659:9:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        }
+                      },
+                      {
+                        "hexValue": "66616c7365",
+                        "id": 339,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "bool",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "2670:5:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        "value": "false"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        },
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      ],
+                      "id": 335,
+                      "name": "CropAction",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 218,
+                      "src": "2636:10:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_event_nonpayable$_t_address_$_t_string_memory_ptr_$_t_bool_$returns$__$",
+                        "typeString": "function (address,string memory,bool)"
+                      }
+                    },
+                    "id": 340,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2636:40:1",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 341,
+                  "nodeType": "EmitStatement",
+                  "src": "2631:45:1"
+                }
+              ]
+            },
+            "functionSelector": "ad7bfa2f",
+            "id": 343,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [
+              {
+                "id": 321,
+                "modifierName": {
+                  "id": 320,
+                  "name": "onlyOwner",
+                  "nodeType": "IdentifierPath",
+                  "referencedDeclaration": 251,
+                  "src": "2487:9:1"
+                },
+                "nodeType": "ModifierInvocation",
+                "src": "2487:9:1"
+              }
+            ],
+            "name": "rejectCrop",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 319,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 318,
+                  "mutability": "mutable",
+                  "name": "_cropName",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 343,
+                  "src": "2455:23:1",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 317,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2455:6:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2454:25:1"
+            },
+            "returnParameters": {
+              "id": 322,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2497:0:1"
+            },
+            "scope": 362,
+            "src": "2435:282:1",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 360,
+              "nodeType": "Block",
+              "src": "2855:142:1",
+              "statements": [
+                {
+                  "assignments": [
+                    351
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 351,
+                      "mutability": "mutable",
+                      "name": "cropHash",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 360,
+                      "src": "2866:16:1",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      },
+                      "typeName": {
+                        "id": 350,
+                        "name": "bytes32",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "2866:7:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 355,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "id": 353,
+                        "name": "_cropName",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 345,
+                        "src": "2898:9:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        }
+                      ],
+                      "id": 352,
+                      "name": "_getCropHash",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 289,
+                      "src": "2885:12:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_pure$_t_string_memory_ptr_$returns$_t_bytes32_$",
+                        "typeString": "function (string memory) pure returns (bytes32)"
+                      }
+                    },
+                    "id": 354,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2885:23:1",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "2866:42:1"
+                },
+                {
+                  "expression": {
+                    "baseExpression": {
+                      "id": 356,
+                      "name": "cropStatus",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 222,
+                      "src": "2926:10:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_mapping$_t_bytes32_$_t_bool_$",
+                        "typeString": "mapping(bytes32 => bool)"
+                      }
+                    },
+                    "id": 358,
+                    "indexExpression": {
+                      "id": 357,
+                      "name": "cropHash",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 351,
+                      "src": "2937:8:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      }
+                    },
+                    "isConstant": false,
+                    "isLValue": true,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "nodeType": "IndexAccess",
+                    "src": "2926:20:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "functionReturnParameters": 349,
+                  "id": 359,
+                  "nodeType": "Return",
+                  "src": "2919:27:1"
+                }
+              ]
+            },
+            "functionSelector": "91e547a6",
+            "id": 361,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getCropStatus",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 346,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 345,
+                  "mutability": "mutable",
+                  "name": "_cropName",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 361,
+                  "src": "2803:23:1",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 344,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2803:6:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2802:25:1"
+            },
+            "returnParameters": {
+              "id": 349,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 348,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 361,
+                  "src": "2849:4:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 347,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2849:4:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2848:6:1"
+            },
+            "scope": 362,
+            "src": "2780:217:1",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "public"
+          }
+        ],
+        "scope": 363,
+        "src": "516:2484:1"
+      }
+    ],
+    "src": "33:2969:1"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.0+commit.c7dfd78e.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.16",
+  "updatedAt": "2024-10-21T20:37:14.504Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

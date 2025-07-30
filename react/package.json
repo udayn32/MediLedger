@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "ethers": "^6.13.4",
+    "lucide-react": "^0.454.0",
+    "react-router-dom": "^6.27.0",
+    "solc": "^0.8.0",
+    "web3": "^4.14.0"
+  }
+}

@@ -1,0 +1,250 @@
+<style>
+    /* Original CSS styles */
+    .container {
+      background-color: #fff;
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+    }
+  
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+  
+    .form-group {
+      margin-bottom: 20px;
+    }
+  
+    input {
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+      padding: 10px;
+      width: 100%;
+    }
+  
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+  
+    button:hover {
+      background-color: #0056b3;
+    }
+  
+    h2 {
+      color: #333;
+      margin-top: 30px;
+    }
+  
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+  
+    li {
+      background-color: #fff;
+      margin-bottom: 10px;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+  
+    .report-details {
+      margin-top: 10px;
+    }
+  
+    .report-details span {
+      display: block;
+      margin-bottom: 5px;
+    }
+  
+    .report-details span:first-child {
+      font-weight: bold;
+    }
+  
+    /* Additional CSS styles */
+    .search-bar {
+      margin-bottom: 20px;
+      padding: 10px;
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+      width: 100%;
+    }
+  
+    .search-bar input[type="search"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+    }
+  
+    .search-bar button[type="submit"] {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+  
+    .search-bar button[type="submit"]:hover {
+      background-color: #0056b3;
+    }
+  
+    .sort-order {
+      margin-bottom: 20px;
+    }
+  
+    .sort-order select {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+    }
+  </style>
+  
+  <script>
+    let web3;
+    let inspectorContract;
+  
+    const inspectorABI = [
+      // Your Inspector Contract ABI goes here
+    ];
+    const inspectorAddress = '0xYOUR_CONTRACT_ADDRESS'; // Replace with your contract address
+  
+    window.addEventListener('load', async function() {
+      if (window.ethereum) {
+        web3 = new Web3(window.ethereum);
+        await window.ethereum.enable();
+      } else {
+        alert('Please install MetaMask to interact with this page.');
+      }
+  
+      inspectorContract = new web3.eth.Contract(inspectorABI, inspectorAddress);
+      loadReports();
+    });
+  
+    async function submitInspection() {
+      const accounts = await web3.eth.getAccounts();
+      const productId = document.getElementById('product_id').value;
+      const inspectionResult = document.getElementById('inspection_result').value;
+  
+      await inspectorContract.methods.addInspection(productId, inspectionResult)
+        .send({ from: accounts[0] })
+        .on('receipt', function() {
+          alert('Inspection report submitted successfully!');
+          loadReports();
+        })
+        .on('error', function(error) {
+          console.error(error);
+          alert('Error submitting inspection report.');
+        });
+    }
+  
+    async function loadReports() {
+      const reports = await inspectorContract.methods.getAllReports().call();
+      const reportsElement = document.getElementById('reports');
+      reportsElement.innerHTML = '';
+  
+      reports.forEach((report) => {
+        const listItem = document.createElement('li');
+        const reportDetails = document.createElement('div');
+        reportDetails.classList.add('report-details');
+  
+        reportDetails.innerHTML = `
+          <span>Product ID: ${report.productId}</span>
+          <span>Result: ${report.result}</span>
+          <span>Timestamp: ${new Date(report.timestamp * 1000).toLocaleString()}</span>
+          <span>Inspector: ${report.inspector}</span>
+        ` ;
+  
+        listItem.appendChild(reportDetails);
+        reportsElement.appendChild(listItem);
+      });
+    }
+  
+    async function searchReports() {
+      const searchTerm = document.getElementById('search-term').value;
+      const reports = await inspectorContract.methods.getAllReports().call();
+      const filteredReports = reports.filter((report) => {
+        return report.productId.includes(searchTerm) || report.result.includes(searchTerm) || report.inspector.includes(searchTerm);
+      });
+      displayReports(filteredReports);
+    }
+  
+    async function sortReports() {
+      const sortOrder = document.getElementById('sort-order').value;
+      const reports = await inspectorContract.methods.getAllReports().call();
+      const sortedReports = reports.sort((a, b) => {
+        if (sortOrder === 'asc') {
+          return a.timestamp - b.timestamp;
+        } else {
+          return b.timestamp - a.timestamp;
+        }
+      });
+      displayReports(sortedReports);
+    }
+  
+    async function displayReports(reports) {
+      const reportsElement = document.getElementById('reports');
+      reportsElement.innerHTML = '';
+  
+      reports.forEach((report) => {
+        const listItem = document.createElement('li');
+        const reportDetails = document.createElement('div');
+        reportDetails.classList.add('report-details');
+  
+        reportDetails.innerHTML = `
+          <span>Product ID: ${report.productId}</span>
+          <span>Result: ${report.result}</span>
+          <span>Timestamp: ${new Date(report.timestamp * 1000).toLocaleString()}</span>
+          <span>Inspector: ${report.inspector}</span>
+        `;
+  
+        listItem.appendChild(reportDetails);
+        reportsElement.appendChild(listItem);
+      });
+    }
+  </script>
+  
+  <!-- HTML structure -->
+  <div class="container">
+    <h1>Inspection Reports</h1>
+    <form>
+      <div class="form-group">
+        <label for="product_id">Product ID:</label>
+        <input type="text" id="product_id" />
+      </div>
+      <div class="form-group">
+        <label for="inspection_result">Inspection Result:</label>
+        <input type="text" id="inspection_result" />
+      </div>
+      <button type="button" onclick="submitInspection()">Submit Inspection</button>
+    </form>
+  
+    <div class="search-bar">
+      <input type="search" id="search-term" placeholder="Search reports..." />
+      <button type="button" onclick="searchReports()">Search</button>
+    </div>
+  
+    <div class="sort-order">
+      <select id="sort-order">
+        <option value="asc">Sort by timestamp (ascending)</option>
+        <option value="desc">Sort by timestamp (descending)</option>
+      </select>
+      <button type="button" onclick="sortReports()">Sort</button>
+    </div>
+  
+    <ul id="reports"></ul>
+  </div>

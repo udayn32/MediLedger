@@ -1,0 +1,24 @@
+{
+  "dependencies": {
+    "express": "^4.21.0",
+    "mongoose": "^8.7.0",
+    "truffle": "^5.11.5",
+    "web3": "^4.13.0"
+  },
+  "name": "block",
+  "version": "1.0.0",
+  "main": "app.js",
+  "directories": {
+    "test": "test"
+  },
+  "devDependencies": {
+    "mocha": "^10.1.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

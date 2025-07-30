@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View My Crops</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"> 
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #28a745;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>My Crops</h2>
+    <h4>Farmer Details</h4>
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Location</th>
+            <th>Phone</th>
+            <th>Email</th>
+        </tr>
+        <tr id="farmerDetailsRow">
+            <td colspan="4">Loading farmer details...</td>
+        </tr>
+    </table>
+
+    <h4>Crops List</h4>
+    <table id="cropsTable">
+        <thead>
+            <tr>
+                <th>Crop Name</th>
+                <th>Quantity (kg)</th>
+                <th>Price (ETH)</th>
+                <th>Place of Origin</th>
+            </tr>
+        </thead>
+        <tbody id="cropsList"></tbody>
+    </table>
+    <div class="message" id="message"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.0.0-beta.36/dist/web3.min.js"></script>
+<script>
+    const contractABI = [
+        {
+            "inputs": [],
+            "name": "getFarmerDetails",
+            "outputs": [
+                {
+                    "components": [
+                        { "internalType": "string", "name": "name", "type": "string" },
+                        { "internalType": "string", "name": "location", "type": "string" },
+                        { "internalType": "string", "name": "phone", "type": "string" },
+                        { "internalType": "string", "name": "email", "type": "string" }
+                    ],
+                    "internalType": "struct Farmer.FarmerDetails",
+                    "name": "",
+                    "type": "tuple"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "getCrops",
+            "outputs": [
+                {
+                    "components": [
+                        { "internalType": "string", "name": "cropName", "type": "string" },
+                        { "internalType": "uint256", "name": "quantity", "type": "uint256" },
+                        { "internalType": "uint256", "name": "price", "type": "uint256" },
+                        { "internalType": "string", "name": "placeOfOrigin", "type": "string" }
+                    ],
+                    "internalType": "struct Farmer.Crop[]",
+                    "name": "",
+                    "type": "tuple[]"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function",
+            "constant": true
+        }
+    ];
+
+    const contractAddress = '0x297fAa5Eca9cFEBE9112588A513e5eCB668ACc17'; // Replace with your contract address
+    const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:9545"));
+    const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+    let accounts;
+
+    // Fetch available accounts from Ganache
+    web3.eth.getAccounts()
+        .then(acc => {
+            accounts = acc;
+            fetchFarmerDetails();
+            fetchMyCrops();
+        })
+        .catch(error => {
+            console.error("Error fetching accounts:", error);
+            document.getElementById('message').textContent = "Error fetching accounts. Please check your Ganache setup.";
+        });
+
+    // Function to fetch and display farmer details
+    async function fetchFarmerDetails() {
+        try {
+            const farmerDetails = await contract.methods.getFarmerDetails().call({ from: accounts[0] });
+            const farmerDetailsRow = document.getElementById('farmerDetailsRow');
+            farmerDetailsRow.innerHTML = `
+                <td>${farmerDetails.name}</td>
+                <td>${farmerDetails.location}</td>
+                <td>${farmerDetails.phone}</td>
+                <td>${farmerDetails.email}</td>
+            `;
+        } catch (error) {
+            console.error("Error fetching farmer details:", error);
+            document.getElementById('message').textContent = "Error fetching farmer details. Please check the console for details.";
+        }
+    }
+
+    // Function to fetch and display crops
+    async function fetchMyCrops() {
+        try {
+            const crops = await contract.methods.getCrops().call({ from: accounts[0] });
+            const cropsList = document.getElementById('cropsList');
+            cropsList.innerHTML = ''; // Clear previous listings
+
+            crops.forEach(crop => {
+                const cropRow = document.createElement('tr');
+                cropRow.innerHTML = `
+                    <td>${crop.cropName}</td>
+                    <td>${crop.quantity}</td>
+                    <td>${web3.utils.fromWei(crop.price.toString(), 'ether')}</td>
+                    <td>${crop.placeOfOrigin}</td>
+                `;
+                cropsList.appendChild(cropRow);
+            });
+        } catch (error) {
+            console.error("Error fetching crops:", error);
+            document.getElementById('message').textContent = "Error fetching crops. Please check the console for details.";
+        }
+    }
+</script>
+
+</body>
+</html>
