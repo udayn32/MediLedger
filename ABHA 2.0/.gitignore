@@ -1,0 +1,77 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Production builds
+.next/
+out/
+build/
+dist/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+env/
+.env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# AI Model files (large files)
+*.keras
+*.h5
+*.model
+
+# Training data (large datasets)
+server/data/chest_xray/
+
+# Generated images
+*.png
+*.jpg
+*.jpeg
+
+# Cache
+.cache/
+*.tsbuildinfo
+
+# Testing
+coverage/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Other projects (from parent directory)
+../Agrichain/
+../AgroChain/
+../DSApython/
+../Farm-To-Plate/
+../NextJS/
+../Nextjs-flask/
+../block/
+../blockchain-agro/
+../react/

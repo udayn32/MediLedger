@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## ABHA 2.0 – Decentralized Health Records & AI X‑Ray Analysis
 
-## Getting Started
+ABHA 2.0 combines: 
+- Ethereum smart contracts for record ownership & doctor access control
+- IPFS for decentralized storage of patient X‑ray images
+- A Next.js dApp (App Router) for patient interaction
+- A Python (FastAPI + TensorFlow) service for pneumonia detection
 
-First, run the development server:
+### High-Level Flow
+1. Patient uploads an X‑ray -> file stored on local IPFS node -> CID returned
+2. CID + metadata stored on-chain via `HealthRecord` contract
+3. Doctor (or patient) retrieves record IDs and authorized CIDs from blockchain
+4. Image fetched from IPFS gateway and sent to AI inference API
+5. Model returns prediction (PNEUMONIA / NORMAL + confidence)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### Repos / Folders
+```
+abha/                 # Next.js frontend + contract artifacts
+contracts/            # Solidity contract (HealthRecord.sol)
+server/               # ML training + inference (FastAPI)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Prerequisites
+- Node.js 18+
+- Python 3.10+
+- Local IPFS daemon (port 5001 API, gateway 8080)
+- MetaMask (connected to same network as deployed contract)
+- Deployed `HealthRecord` contract; set `NEXT_PUBLIC_CONTRACT_ADDRESS` in `.env.local`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Install & Run (Frontend)
+```bash
+cd abha
+npm install
+npm run dev
+```
+App: http://localhost:3000 (landing) and http://localhost:3000/dashboard (patient dashboard)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Smart Contract
+Located at `contracts/HealthRecord.sol` with functions:
+- addRecord(ipfsCid, fileName)
+- getMyRecordIds()
+- getRecordById(id)
+- grantAccess(recordId, doctorAddress)
+- revokeAccess(recordId, doctorAddress)
 
-## Learn More
+### Python Inference Service
+Train (optional if model already provided):
+```bash
+cd server
+python train_model.py
+```
+Run inference API:
+```bash
+cd server
+pip install -r requirements.txt
+uvicorn inference_service:app --reload --port 8001
+```
+Health check: http://localhost:8001/health
 
-To learn more about Next.js, take a look at the following resources:
+### Frontend -> Backend Integration
+- Upload: dashboard calls IPFS HTTP API directly (POST /api/v0/add)
+- Analysis: dashboard -> Next.js route `/api/analyze` -> Python `/predict`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Environment Variables
+In `abha/.env.local`:
+```
+NEXT_PUBLIC_CONTRACT_ADDRESS=0xYourAddress
+INFERENCE_API_URL=http://127.0.0.1:8001
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Security & Next Steps
+- Add role UI for doctor management (owner only)
+- Implement doctor view for requesting patient record access
+- Add JWT / signature based auth for inference API (optional)
+- Add pinning (e.g., web3.storage) for IPFS persistence
+- Add model versioning & performance metrics dashboard
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### License
+MIT

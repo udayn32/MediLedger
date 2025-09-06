@@ -1,0 +1,50 @@
+{
+  "validation": {
+    "threshold": 0.5,
+    "accuracy": 0.5,
+    "precision": 0.5,
+    "recall": 1.0,
+    "f1": 0.6666666666666666,
+    "roc_auc": 0.640625,
+    "pr_auc": 0.6696584665334665,
+    "log_loss": 1.0013576426113948,
+    "brier_score": 0.36460351326947915,
+    "mse": 0.36460351943969727,
+    "r2": -0.45841407775878906,
+    "confusion_matrix": [
+      [
+        0,
+        8
+      ],
+      [
+        0,
+        8
+      ]
+    ],
+    "classification_report": "              precision    recall  f1-score   support\n\n      NORMAL       0.00      0.00      0.00         8\n   PNEUMONIA       0.50      1.00      0.67         8\n\n    accuracy                           0.50        16\n   macro avg       0.25      0.50      0.33        16\nweighted avg       0.25      0.50      0.33        16\n"
+  },
+  "test": {
+    "threshold": 0.5,
+    "accuracy": 0.625,
+    "precision": 0.625,
+    "recall": 1.0,
+    "f1": 0.7692307692307693,
+    "roc_auc": 0.8327635327635328,
+    "pr_auc": 0.8894665233170449,
+    "log_loss": 0.769376903401267,
+    "brier_score": 0.2732813962971104,
+    "mse": 0.27328139543533325,
+    "r2": -0.1660006046295166,
+    "confusion_matrix": [
+      [
+        0,
+        234
+      ],
+      [
+        0,
+        390
+      ]
+    ],
+    "classification_report": "              precision    recall  f1-score   support\n\n      NORMAL       0.00      0.00      0.00       234\n   PNEUMONIA       0.62      1.00      0.77       390\n\n    accuracy                           0.62       624\n   macro avg       0.31      0.50      0.38       624\nweighted avg       0.39      0.62      0.48       624\n"
+  }
+}

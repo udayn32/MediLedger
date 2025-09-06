@@ -1,0 +1,11 @@
+fastapi==0.111.0
+uvicorn==0.30.1
+tensorflow==2.17.0
+Pillow==10.4.0
+python-multipart==0.0.9
+requests==2.32.3
+python-dotenv==1.0.1
+kagglehub==0.3.4
+scikit-learn==1.5.1
+matplotlib==3.9.0
+PyMuPDF==1.24.9
