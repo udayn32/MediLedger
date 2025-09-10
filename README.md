@@ -1,4 +1,4 @@
-﻿#  MediLedger - Blockchain Healthcare Management System
+﻿#  MediLedger - *A revolutionary healthcare management platform combining blockchain security, AI-powered diagnostics, and decentralized storage for complete patient data control.
 
 > **A revolutionary healthcare management platform combining blockchain security, AI-powered diagnostics, and decentralized storage for complete patient data control.**
 
@@ -34,4 +34,5 @@
 ---
 
  **Revolutionizing Healthcare with Blockchain and AI** 
+
 
